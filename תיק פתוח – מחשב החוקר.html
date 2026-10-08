@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>תיק פתוח – מחשב החוקר</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;800&family=Heebo:wght@400;500;700&display=swap">
+<style>
+:root{--bg:#0f1923;--panel:#182532;--panel2:#1f3040;--line:#2d4153;--text:#e8eef3;--mute:#8da2b2;--tag:#f2c14e;--ok:#2fbf71;--bad:#e5484d;--ink:#0b1219;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root[data-theme="light"]{--bg:#e9eef2;--panel:#fff;--panel2:#f1f5f8;--line:#cbd6de;--text:#14222d;--mute:#576b7a;--ink:#fff;--tag:#a87400}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Heebo,Arial,sans-serif;min-height:100vh;line-height:1.55}
+.serif{font-family:"Frank Ruhl Libre",Georgia,serif}
+.app{max-width:980px;margin:0 auto;padding:20px 16px 48px}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;background:var(--panel);border:1px solid var(--line);border-radius:10px;margin-bottom:18px}
+.bar b{font-weight:700}.bar small{color:var(--mute)}
+.dots{display:flex;gap:6px}.dots i{width:10px;height:10px;border-radius:50%;background:var(--line)}
+.dots i.on{background:var(--tag)}.dots i.done{background:var(--ok)}.dots i.miss{background:var(--bad)}
+.screen{display:none}.screen.show{display:block}
+.intro{padding:36px 24px;background:var(--panel);border:1px solid var(--line);border-radius:14px}
+.intro h1{font-size:clamp(30px,6vw,52px);margin:0 0 10px;line-height:1.1;font-weight:800}
+.intro p{color:var(--mute);max-width:56ch;margin:0 0 22px}
+.rules{display:grid;gap:10px;margin:0 0 26px;padding:0;list-style:none}
+.rules li{padding:10px 14px;background:var(--panel2);border-radius:8px;border-inline-start:3px solid var(--tag)}
+button{font:inherit;cursor:pointer;border:0}
+.btn{background:var(--tag);color:#1b1500;font-weight:700;padding:13px 26px;border-radius:8px;font-size:17px}
+.btn:hover{filter:brightness(1.08)}
+:focus-visible{outline:3px solid var(--tag);outline-offset:2px}
+.grid{display:grid;grid-template-columns:1.1fr 1fr;gap:16px}
+@media (max-width:760px){.grid{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px}
+.file-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.tagc{background:var(--tag);color:#1b1500;font-weight:700;padding:3px 10px;border-radius:5px;font-size:14px}
+.card h2{margin:0 0 10px;font-size:26px;font-weight:800}
+.evid{background:var(--panel2);border-radius:8px;padding:14px;margin:12px 0;border:1px dashed var(--line)}
+.evid span{color:var(--mute);font-size:14px;display:block;margin-bottom:4px}
+.post{display:flex;gap:12px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.av{flex:none;width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#3b6b8a,#f2c14e);display:grid;place-items:center;font-weight:700;color:#10202c}
+.post p{margin:2px 0 0;font-size:15px}.post small{color:var(--mute)}
+.q{font-weight:700;font-size:19px;margin:0 0 14px}
+.opts{display:grid;gap:10px}
+.opt{display:flex;align-items:center;gap:12px;text-align:start;width:100%;background:var(--panel2);color:var(--text);padding:14px 16px;border-radius:10px;border:2px solid transparent;font-size:17px}
+.opt:hover{border-color:var(--mute)}
+.opt .k{width:28px;height:28px;border-radius:6px;background:var(--line);display:grid;place-items:center;font-weight:700;font-size:14px;flex:none}
+.opt.sel{border-color:var(--tag)}.opt.sel .k{background:var(--tag);color:#1b1500}
+.opt.right{border-color:var(--ok);background:rgba(47,191,113,.15)}
+.opt.wrong{border-color:var(--bad);background:rgba(229,72,77,.15)}
+.opt:disabled{cursor:default}
+.fb{margin-top:14px;padding:12px 14px;border-radius:8px;display:none;font-size:15px}
+.fb.show{display:block}.fb.ok{background:rgba(47,191,113,.15)}.fb.no{background:rgba(229,72,77,.15)}
+.actions{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:10px}
+.actions .btn[disabled]{opacity:.4;cursor:default}
+.result{position:fixed;inset:0;z-index:9;display:none;overflow-y:auto;padding:calc(24px + env(safe-area-inset-top,0px)) 16px calc(24px + env(safe-area-inset-bottom,0px))}
+.result.show{display:block;animation:rise .5s ease}
+@keyframes rise{from{opacity:0;transform:scale(1.03)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.result.show{animation:none}}
+.result.pass{background:#0d5a37;color:#eafff3}.result.fail{background:#6b1418;color:#fff0f0}
+.rin{max-width:620px;margin:0 auto;text-align:center}
+.stamp{width:110px;height:110px;margin:20px auto;border-radius:50%;border:6px solid currentColor;display:grid;place-items:center;font-size:58px;font-weight:800;transform:rotate(-8deg)}
+.rin h2{font-size:clamp(34px,8vw,56px);margin:0;font-weight:800}
+.rin .sc{font-size:22px;margin:8px 0 22px}
+.rev{list-style:none;padding:0;margin:0 0 24px;text-align:start;display:grid;gap:8px}
+.rev li{background:rgba(0,0,0,.25);padding:10px 14px;border-radius:8px;font-size:15px}
+.rev b{margin-inline-end:6px}
+.btn.light{background:#fff;color:#111}
+
+.screen.show{animation:fadein .4s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.intro h1{animation:fadein .7s .1s both}
+.rules li{animation:fadein .5s both}.rules li:nth-child(1){animation-delay:.3s}.rules li:nth-child(2){animation-delay:.45s}.rules li:nth-child(3){animation-delay:.6s}
+.grid.swap .card:first-child{animation:slidein .45s ease both}
+.grid.swap .card:last-child{animation:slidein .45s .12s ease both}
+@keyframes slidein{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.grid.swap .evid{animation:fadein .4s both}.grid.swap .evid:nth-of-type(2){animation-delay:.25s}.grid.swap .evid:nth-of-type(3){animation-delay:.4s}
+.grid.swap .opt{animation:fadein .35s both}
+.grid.swap .opt:nth-child(1){animation-delay:.2s}.grid.swap .opt:nth-child(2){animation-delay:.3s}.grid.swap .opt:nth-child(3){animation-delay:.4s}.grid.swap .opt:nth-child(4){animation-delay:.5s}
+.opt,.btn{transition:transform .15s,border-color .15s,background .2s,filter .15s}
+.opt:not(:disabled):hover{transform:translateY(-2px)}
+.btn:not([disabled]):hover{transform:translateY(-2px)}
+.btn:not([disabled]):active{transform:scale(.97)}
+.opt.right{animation:pop .45s ease}
+.opt.wrong{animation:shake .45s ease}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.04)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
+.fb.show{animation:fadein .35s ease}
+.dots i{transition:background .3s,transform .3s}
+.dots i.done,.dots i.miss{transform:scale(1.25)}
+.dots i.on{animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.5);opacity:.6}}
+.result.show .stamp{animation:slam .7s .3s cubic-bezier(.2,1.5,.4,1) both}
+@keyframes slam{from{opacity:0;transform:rotate(-30deg) scale(3)}to{opacity:1;transform:rotate(-8deg) scale(1)}}
+.result.show .rin h2{animation:fadein .5s .7s both}
+.result.show .sc{animation:fadein .5s .85s both}
+.result.show .rev li{animation:fadein .4s both}
+.result.show .rev li:nth-child(1){animation-delay:1s}.result.show .rev li:nth-child(2){animation-delay:1.1s}.result.show .rev li:nth-child(3){animation-delay:1.2s}.result.show .rev li:nth-child(4){animation-delay:1.3s}.result.show .rev li:nth-child(5){animation-delay:1.4s}
+.result.show .btn{animation:fadein .4s 1.5s both}
+.result.pass.show .stamp::after{content:"";position:absolute;width:110px;height:110px;border-radius:50%;border:3px solid currentColor;animation:ring 1.6s 1s ease-out 2}
+.stamp{position:relative}
+@keyframes ring{from{opacity:.7;transform:scale(1)}to{opacity:0;transform:scale(2.2)}}
+@media (prefers-reduced-motion:reduce){*,*::after{animation:none!important;transition:none!important}}
+
+body{background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:44px 44px;background-position:-1px -1px;background-attachment:fixed}
+body::before{content:"";position:fixed;inset:0;background:radial-gradient(ellipse at 50% 0,transparent 0,var(--bg) 75%);pointer-events:none;z-index:-1;opacity:.92}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px 13px;margin-bottom:22px;background:color-mix(in srgb,var(--panel) 88%,transparent);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 30px -14px rgba(0,0,0,.6);overflow:visible}
+.brand{display:flex;align-items:center;gap:12px}.brand b{display:block;font-size:20px;line-height:1.1}.brand small{color:var(--mute);font-size:12.5px}
+.top-r{display:flex;align-items:center;gap:16px}
+.pbar{position:absolute;inset-inline:14px;bottom:0;height:3px;background:var(--line);border-radius:3px;overflow:hidden}
+.pbar i{display:block;height:100%;width:0;background:var(--tag);transition:width .6s cubic-bezier(.3,.9,.3,1)}
+.acct{position:relative}
+#acc{position:relative;width:42px;height:42px;border-radius:50%;background:var(--panel2);color:var(--text);border:1px solid var(--line);display:grid;place-items:center;transition:border-color .15s,transform .15s}
+#acc:hover,#acc[aria-expanded="true"]{border-color:var(--tag);transform:translateY(-1px)}
+.live{position:absolute;bottom:1px;inset-inline-end:1px;width:11px;height:11px;border-radius:50%;background:var(--ok);border:2px solid var(--panel)}
+.pop{position:absolute;top:calc(100% + 12px);inset-inline-end:0;width:262px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 24px 50px -16px rgba(0,0,0,.7);z-index:8;animation:fadein .2s ease}
+.pop[hidden]{display:none}
+.pop-h{display:flex;gap:12px;align-items:center;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.pop-h b{display:block}.pop-h small{color:var(--mute)}
+.av.big{width:48px;height:48px;font-size:20px}
+.pop dl{margin:12px 0 0;display:grid;gap:10px}.pop dl div{display:flex;justify-content:space-between;font-size:14.5px}
+.pop dt{color:var(--mute)}.pop dd{margin:0;font-weight:700;display:flex;align-items:center;gap:6px}
+.okdot{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+.card,.intro{border-radius:16px;box-shadow:0 18px 40px -22px rgba(0,0,0,.75);position:relative;overflow:hidden}
+.card::before,.intro::before{content:"";position:absolute;inset-inline:0;top:0;height:3px;background:linear-gradient(90deg,var(--tag),transparent 70%)}
+.tagc{background:transparent;color:var(--tag);border:1px solid var(--tag);font-weight:500;letter-spacing:.3px}
+.evid{border-style:solid;border-inline-start:3px solid var(--tag);border-radius:4px 10px 10px 4px}
+.opt{border:1px solid var(--line);box-shadow:0 1px 0 rgba(255,255,255,.03) inset}
+.opt:not(:disabled):hover{border-color:var(--tag);background:var(--panel)}
+.opt.sel,.opt.right,.opt.wrong{border-width:2px}
+.btn{box-shadow:0 8px 20px -10px var(--tag)}
+.btn.light{box-shadow:none}
+.post{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px}
+.rev li{border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(2px)}
+@media (max-width:560px){.brand small{display:none}.top-r{gap:10px}.dots{display:none}}
+#theme{width:42px;height:42px;border-radius:50%;background:var(--panel2);color:var(--text);border:1px solid var(--line);display:grid;place-items:center;transition:border-color .15s,transform .15s}
+#theme:hover{border-color:var(--tag);transform:translateY(-1px)}
+#theme .moon{display:none}:root[data-theme="light"] #theme .sun{display:none}:root[data-theme="light"] #theme .moon{display:block}
+:root[data-theme="light"] body::before{opacity:.8}
+:root[data-theme="light"] .card,:root[data-theme="light"] .intro{box-shadow:0 14px 30px -20px rgba(20,34,45,.35)}
+:root[data-theme="light"] .top{box-shadow:0 10px 24px -16px rgba(20,34,45,.35)}
+#theme{position:fixed;left:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:6;width:48px;height:48px;background:var(--panel);box-shadow:0 10px 24px -8px rgba(0,0,0,.6)}
+</style>
+<script>try{if(localStorage.getItem("dq-theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand"><svg viewBox="0 0 32 32" width="34" height="34" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#f2c14e"/><circle cx="14" cy="14" r="6" fill="none" stroke="#1b1500" stroke-width="2.6"/><path d="M19 19l6 6" stroke="#1b1500" stroke-width="2.8" stroke-linecap="round"/></svg><div><b class="serif">מחשב החוקר</b><small>מחלקת סמים · מערכת פנימית</small></div></div>
+    <div class="top-r"><div class="dots" id="dots" aria-hidden="true"></div>
+      <div class="acct"><button id="acc" aria-haspopup="true" aria-expanded="false" aria-label="החשבון שלי"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c.8-3.6 3.8-5.5 7.5-5.5s6.7 1.9 7.5 5.5"/></svg><i class="live"></i></button>
+        <div class="pop" id="pop" hidden><div class="pop-h"><div class="av big">ח</div><div><b>חוקר ראשי</b><small>תג מספר 4417</small></div></div>
+          <dl><div><dt>סטטוס</dt><dd><span class="okdot"></span>מחובר</dd></div><div><dt>ניסיונות</dt><dd id="st-att">0</dd></div><div><dt>שיא תוצאה</dt><dd id="st-best">–</dd></div></dl></div></div></div>
+    <div class="pbar"><i id="pfill"></i></div>
+  </header>
+
+  <section class="screen show" id="intro">
+    <div class="intro">
+      <h1 class="serif">שישה תיקים פתוחים על השולחן</h1>
+      <p>בכל תיק יש ממצא מהזירה ופוסט אחרון של החשוד. קראו את הראיות וקבעו איזה סם נתפס.</p>
+      <ul class="rules">
+        <li>6 תיקים שנבחרים אקראית מתוך מאגר, שאלה אמריקאית אחת לכל תיק</li>
+        <li>צריך לפתור לפחות 4 תיקים כדי לעבור</li>
+        <li>אחרי כל תשובה תראו הסבר קצר</li>
+      </ul>
+      <button class="btn" id="start">פתח תיק ראשון</button>
+    </div>
+  </section>
+
+  <section class="screen" id="case">
+    <div class="grid">
+      <article class="card">
+        <div class="file-head"><span class="tagc" id="cid"></span><small id="cnt" style="color:var(--mute)"></small></div>
+        <h2 class="serif" id="ctitle"></h2>
+        <div class="evid"><span>ממצא מהזירה</span><div id="cev"></div></div>
+        <div class="evid"><span>התנהגות החשוד</span><div id="cbeh"></div></div>
+        <div class="post"><div class="av" id="cav"></div><div><b id="chandle"></b> <small>· לפני שעתיים</small><p id="cpost"></p></div></div>
+      </article>
+      <article class="card">
+        <p class="q" id="cq">איזה סם נתפס?</p>
+        <div class="opts" id="opts"></div>
+        <div class="fb" id="fb" role="status"></div>
+        <div class="actions"><span style="color:var(--mute)" id="hint">בחרו תשובה</span><button class="btn" id="next" disabled>לתיק הבא</button></div>
+      </article>
+    </div>
+  </section>
+</div>
+
+<button id="theme" aria-label="החלפה בין מצב כהה לבהיר" title="החלפת מצב תצוגה"><svg class="sun" viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"/></svg><svg class="moon" viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 019.5 4 8 8 0 1020 14.5z"/></svg></button>
+
+<div class="result pass" id="pass" role="dialog" aria-modal="true" aria-labelledby="pt">
+  <div class="rin"><div class="stamp"><svg viewBox="0 0 24 24" width="62" height="62" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><h2 class="serif" id="pt">עברת!</h2><div class="sc" id="ps"></div><ul class="rev" id="prev"></ul><button class="btn light" data-retry>פתח תיקים חדשים</button></div>
+</div>
+<div class="result fail" id="fail" role="dialog" aria-modal="true" aria-labelledby="ft">
+  <div class="rin"><div class="stamp"><svg viewBox="0 0 24 24" width="62" height="62" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></div><h2 class="serif" id="ft">לא עברת</h2><div class="sc" id="fs"></div><ul class="rev" id="frev"></ul><button class="btn light" data-retry>נסה שוב</button></div>
+</div>
+
+<script>
+const POOL=[
+{t:"האבקה בשקית",ev:"אבקה לבנה ודקה בשקית פלסטיק קטנה, נמצאה בכיס הג'ינס.",beh:"אנרגטי מאוד, דיבור מהיר, אישונים מורחבים, כמעט בלי תיאבון.",h:"@night_runner",post:"לא ישן כבר יומיים ואני מרגיש מדהים",opts:["קוקאין","הרואין","קנאביס","LSD"],a:0,why:"אבקה לבנה עם עוררות גבוהה ואישונים מורחבים אופייניים לממריץ כמו קוקאין. הרואין מכווץ אישונים ומרדים."},
+{t:"הנייר המרובע",ev:"דף נייר קטן מחולק לריבועים עם איורים צבעוניים, שמור בתוך קופסת סיגריות.",beh:"מדווח על צבעים שזזים, שומע צלילים כאילו הם נראים, מתקשה לעקוב אחרי זמן.",h:"@colors_alive",post:"הקירות נושמים. אני בסדר, רק תנו לי לצפות",opts:["אקסטזי","LSD","אופיום","קראק"],a:1,why:"הזיות חזותיות וערבוב חושים, יחד עם נייר ספיגה מחולק לריבועים, מצביעים על LSD."},
+{t:"התפרחות היבשות",ev:"תפרחות ירוקות מיובשות בריח חריף ומתקתק, בתוך צנצנת זכוכית.",beh:"עיניים אדומות, צחקוקים בלי סיבה, פה יבש ותיאבון מוגבר.",h:"@snack_mode",post:"מי עוד רעב באחת בלילה? שולח לכולם פיצה",opts:["ספיד","הרואין","קנאביס","פטריות"],a:2,why:"עיניים אדומות, פה יבש ותיאבון מוגבר הם סימנים קלאסיים לצריכת קנאביס."},
+{t:"המזרק",ev:"אבקה חומה-בהירה, כפית חרוכה ומזרק ללא מחט בתיק גב.",beh:"אישונים מכווצים מאוד, ישנוניות עמוקה, נשימה איטית ודיבור מרוח.",h:"@fading_slow",post:"הכל כבד ושקט. רק עוד רגע של שקט",opts:["מתאמפטמין","קוקאין","הרואין","MDMA"],a:2,why:"אישונים מכווצים, נשימה איטית וישנוניות הם סימן לאופיואיד כמו הרואין, ומדובר במצב שדורש טיפול רפואי דחוף."},
+{t:"הטבליות הצבעוניות",ev:"טבליות קטנות עם לוגו מוטבע, בצבעים שונים, נתפסו בכניסה למסיבת טראנס.",beh:"חום גוף גבוה, חיבוקים עם כולם, רגשנות עזה ולסתות מהודקות.",h:"@festival_soul",post:"אני אוהב את כולכם. לא רוצה שהלילה ייגמר",opts:["קטמין","LSD","הרואין","אקסטזי (MDMA)"],a:3,why:"טבליות עם לוגו, חום גוף, חיבה עזה ולסתות מהודקות הם דפוס אופייני ל-MDMA."},
+{t:"הגבישים השקופים",ev:"גבישים שקופים-כחלחלים כמו זכוכית שבורה, בתוך צינור זכוכית קטן.",beh:"ער כבר ימים, חשדן מאוד, שריטות בעור ושיניים פגועות.",h:"@glass_nights",post:"מישהו עוקב אחריי. אל תשלחו אף אחד",opts:["מתאמפטמין","קנאביס","LSD","אופיום"],a:0,why:"גבישים שקופים, ערות ממושכת, פרנויה ופגיעה בשיניים ובעור הם דפוס מוכר של שימוש במתאמפטמין."},
+{t:"הבקבוקון הקטן",ev:"אבקה לבנה בעטיפה מקופלת ובקבוקון זכוכית קטן, ליד דוכן במסיבה.",beh:"מרגיש מנותק מהגוף, לא מגיב לכאב, תנועות איטיות ומבט מפוזר.",h:"@floating_out",post:"אני מסתכל על עצמי מבחוץ. מוזר ויפה",opts:["קוקאין","קטמין","קראק","הרואין"],a:1,why:"תחושת ניתוק מהגוף והיעדר תחושת כאב מצביעים על קטמין. קוקאין היה גורם לעוררות ולא לניתוק."},
+{t:"הפטריות היבשות",ev:"פטריות קטנות מיובשות עם גבעול דק וכובע חום, בשקית נייר.",beh:"צוחק הרבה, מדבר על חיבור לטבע ורואה דפוסים בעצים.",h:"@forest_mind",post:"העצים מדברים אליי. הכל מחובר",opts:["ספיד","פטריות הזיה","MDMA","הרואין"],a:1,why:"פטריות יבשות עם הזיות עדינות ותחושת חיבור לטבע מתאימות לפטריות הזיה (פסילוסיבין)."},
+{t:"האבנים הלבנות",ev:"גושים קטנים לבנים-צהבהבים ומקטרת זכוכית עם קצה שרוף.",beh:"התרגשות קצרה מאוד, ואחריה ירידה חדה, עצבנות וחשק עז לעוד.",h:"@one_more_time",post:"עוד פעם אחת ואני גומר. באמת",opts:["אקסטזי","קראק","LSD","קנאביס"],a:1,why:"אבנים לבנות שמעשנים במקטרת, עם אופוריה קצרה וירידה חדה, מתאימות לקראק."},
+{t:"הכדורים בבליסטר",ev:"כדורים לבנים ועגולים בתוך בליסטר ללא תווית, נמצאו בתיק יד.",beh:"רגוע מאוד, ישנוני, דיבור מבולבל, אבל האישונים אינם מכווצים במיוחד.",h:"@slow_motion",post:"סוף סוף שקט בראש. לא זז מהספה",opts:["קוקאין","כדורי הרגעה (בנזודיאזפינים)","מתאמפטמין","LSD"],a:1,why:"כדורי רגיעה ללא מרשם, רוגע וישנוניות ודיבור מבולבל מצביעים על בנזודיאזפינים."},
+{t:"השרף הכהה",ev:"גוש דביק חום כהה בעל ריח מריר, עטוף בנייר כסף.",beh:"חולמני, כבד בגוף, ישנוני ומגרד באף ובפנים.",h:"@heavy_dreams",post:"הגוף שוקע והראש רחוק",opts:["אופיום","קנאביס","קוקאין","MDMA"],a:0,why:"שרף חום כהה, ריח מריר וישנוניות עם גרד אופייניים לאופיום."}
+];
+let CASES=[];
+const L=["א","ב","ג","ד"],$=id=>document.getElementById(id);
+let i=0,score=0,log=[],locked=false,pick=-1;
+const TOTAL=6,NEED=4;
+function shuf(a){a=a.slice();for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a}
+function newGame(){CASES=shuf(POOL).slice(0,TOTAL).map(c=>{const ix=shuf(c.opts.map((_,n)=>n));return{...c,opts:ix.map(n=>c.opts[n]),a:ix.indexOf(c.a),id:1000+Math.floor(Math.random()*9000)}});i=0;score=0;log=[]}
+newGame();
+function dots(){const pf=$('pfill');if(pf)pf.style.width=(log.length/CASES.length*100)+'%';$('dots').innerHTML=CASES.map((_,n)=>`<i class="${n<log.length?(log[n].ok?'done':'miss'):n===i&&$('case').classList.contains('show')?'on':''}"></i>`).join('')}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('show',s.id===id))}
+function render(){
+  const c=CASES[i];locked=false;pick=-1;
+  $('cid').textContent='תיק מספר '+c.id;$('cnt').textContent=`תיק ${i+1} מתוך ${CASES.length}`;
+  $('ctitle').textContent=c.t;$('cev').textContent=c.ev;$('cbeh').textContent=c.beh;
+  $('chandle').textContent=c.h;$('cpost').textContent=c.post;$('cav').textContent=c.h[1].toUpperCase();
+  $('opts').innerHTML=c.opts.map((o,n)=>`<button class="opt" data-n="${n}"><span class="k">${L[n]}</span>${o}</button>`).join('');
+  $('fb').className='fb';$('next').disabled=true;$('hint').textContent='בחרו תשובה';
+  $('next').textContent=i===CASES.length-1?'סיים וקבל תוצאה':'לתיק הבא';
+  const g=document.querySelector('#case .grid');g.classList.remove('swap');void g.offsetWidth;g.classList.add('swap');
+  dots();
+}
+$('start').onclick=()=>{show('case');render()};
+$('opts').onclick=e=>{
+  const b=e.target.closest('.opt');if(!b||locked)return;locked=true;
+  const n=+b.dataset.n,c=CASES[i],ok=n===c.a;pick=n;
+  if(ok)score++;log.push({ok,c,n});
+  document.querySelectorAll('.opt').forEach(o=>{o.disabled=true;const k=+o.dataset.n;if(k===c.a)o.classList.add('right');else if(k===n)o.classList.add('wrong')});
+  $('fb').className='fb show '+(ok?'ok':'no');
+  $('fb').textContent=(ok?'צדקת. ':'טעית. התשובה הנכונה: '+c.opts[c.a]+'. ')+c.why;
+  $('next').disabled=false;$('hint').textContent=`${score} נכונות עד כה`;dots();$('next').focus();
+};
+$('next').onclick=()=>{
+  if(i<CASES.length-1){i++;render();return}
+  saveStats();const pass=score>=NEED,t=pass?'pass':'fail',p=pass?'p':'f';
+  $(p+'s').textContent=pass?`צדקת ב-${score} שאלות מתוך ${CASES.length}. עברת את מבחן החוקרים.`:`צדקת רק ב-${score} שאלות מתוך ${CASES.length}. נדרשות לפחות ${NEED} כדי לעבור.`;
+  $(p+'t').textContent=pass?(score===TOTAL?'עברת בהצטיינות!':'עברת!'):'לא עברת';
+  $(p+'rev').innerHTML=log.map(r=>`<li><b>${r.ok?'✓':'✕'}</b>${r.c.t}: ${r.c.opts[r.c.a]}</li>`).join('');
+  $(t).classList.add('show');$(t).querySelector('button').focus();
+};
+document.querySelectorAll('[data-retry]').forEach(b=>b.onclick=()=>{
+  $('pass').classList.remove('show');$('fail').classList.remove('show');
+  newGame();show('intro');dots();
+});
+
+let stats={att:0,best:null};
+try{const r=JSON.parse(localStorage.getItem('dq-stats2'));if(r)stats=r}catch(e){}
+function paintStats(){$('st-att').textContent=stats.att;$('st-best').textContent=stats.best===null?'–':stats.best+' מתוך '+CASES.length}
+paintStats();
+const acc=$('acc'),pop=$('pop');
+function togglePop(open){pop.hidden=!open;acc.setAttribute('aria-expanded',open)}
+acc.onclick=e=>{e.stopPropagation();togglePop(pop.hidden)};
+document.addEventListener('click',e=>{if(!pop.contains(e.target))togglePop(false)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')togglePop(false)});
+
+$('theme').onclick=()=>{const root=document.documentElement,light=root.getAttribute('data-theme')!=='light';
+  if(light)root.setAttribute('data-theme','light');else root.removeAttribute('data-theme');
+  try{localStorage.setItem('dq-theme',light?'light':'dark')}catch(e){}};
+function saveStats(){stats.att++;stats.best=Math.max(stats.best||0,score);try{localStorage.setItem('dq-stats2',JSON.stringify(stats))}catch(e){}paintStats()}
+dots();
+</script>
+</body>
+</html>
