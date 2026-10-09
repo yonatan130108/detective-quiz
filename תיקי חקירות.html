@@ -1,0 +1,3804 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>CASEFILE — Investigation Unit</title>
+
+<style>
+
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+    --bg: #080a0f;
+    --panel: #11151d;
+    --panel2: #171c25;
+    --border: #29303c;
+    --text: #e8ecf2;
+    --muted: #7f8998;
+    --red: #d94b57;
+    --red2: #ff6874;
+    --blue: #4c8dff;
+    --green: #49c58b;
+    --yellow: #e7b94f;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background:
+        radial-gradient(circle at 50% -10%, #1b2435 0%, transparent 45%),
+        linear-gradient(135deg, #080a0f, #0d1017);
+
+    color: var(--text);
+    font-family: "Heebo", sans-serif;
+
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+
+/* =========================================================
+   CASE SELECTOR
+========================================================= */
+
+.case-selector {
+
+    position: fixed;
+    inset: 0;
+
+    z-index: 200;
+
+    background:
+        radial-gradient(
+            circle at 50% 15%,
+            #1b2535 0%,
+            #0b0e14 55%,
+            #07090d 100%
+        );
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 30px;
+
+    transition: .4s;
+}
+
+.case-selector.hidden {
+
+    opacity: 0;
+    pointer-events: none;
+
+    transform: scale(1.03);
+}
+
+.case-menu {
+
+    width: min(1050px, 100%);
+}
+
+.case-menu-header {
+
+    text-align: center;
+
+    margin-bottom: 35px;
+}
+
+.small-title {
+
+    color: var(--red2);
+
+    font-family: "JetBrains Mono";
+
+    font-size: 12px;
+
+    letter-spacing: 4px;
+}
+
+.case-menu-header h2 {
+
+    font-size: 46px;
+
+    margin-top: 8px;
+}
+
+.case-menu-header p {
+
+    color: var(--muted);
+
+    margin-top: 5px;
+}
+
+.case-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 13px;
+}
+
+.case-card {
+
+    position: relative;
+
+    padding: 20px;
+
+    min-height: 155px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #171c25,
+            #0f1218
+        );
+
+    border: 1px solid #29313d;
+
+    border-radius: 12px;
+
+    cursor: pointer;
+
+    transition: .25s;
+
+    overflow: hidden;
+}
+
+.case-card::before {
+
+    content: "";
+
+    position: absolute;
+
+    width: 100px;
+    height: 100px;
+
+    background: var(--red);
+
+    opacity: 0;
+
+    filter: blur(45px);
+
+    right: -30px;
+    bottom: -30px;
+
+    transition: .3s;
+}
+
+.case-card:hover {
+
+    transform: translateY(-5px);
+
+    border-color: #687383;
+
+    box-shadow:
+        0 15px 40px rgba(0,0,0,.35);
+}
+
+.case-card:hover::before {
+
+    opacity: .15;
+}
+
+.case-number {
+
+    font-family: "JetBrains Mono";
+
+    font-size: 11px;
+
+    color: var(--red2);
+}
+
+.case-card h3 {
+
+    margin-top: 15px;
+
+    font-size: 18px;
+}
+
+.case-card p {
+
+    color: var(--muted);
+
+    font-size: 12px;
+
+    margin-top: 5px;
+}
+
+.case-difficulty {
+
+    margin-top: 15px;
+
+    font-size: 11px;
+
+    color: var(--yellow);
+}
+
+
+/* =========================================================
+   TOP BAR
+========================================================= */
+
+.topbar {
+
+    height: 72px;
+
+    background:
+        rgba(10, 12, 17, .88);
+
+    backdrop-filter: blur(16px);
+
+    border-bottom:
+        1px solid var(--border);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 0 34px;
+
+    position: sticky;
+
+    top: 0;
+
+    z-index: 50;
+}
+
+.logo {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 13px;
+}
+
+.logo-icon {
+
+    width: 38px;
+    height: 38px;
+
+    border: 1px solid #4a5260;
+
+    border-radius: 9px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    font-family: "JetBrains Mono";
+
+    color: var(--red2);
+
+    box-shadow:
+        0 0 25px rgba(217,75,87,.12);
+}
+
+.logo-title {
+
+    font-weight: 800;
+
+    letter-spacing: 1px;
+}
+
+.logo-sub {
+
+    color: var(--muted);
+
+    font-size: 11px;
+
+    font-family: "JetBrains Mono";
+}
+
+.case-status {
+
+    display: flex;
+
+    gap: 25px;
+
+    align-items: center;
+}
+
+.status-item {
+
+    color: var(--muted);
+
+    font-size: 13px;
+}
+
+.status-item strong {
+
+    color: var(--text);
+
+    margin-right: 5px;
+}
+
+.status-live {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    color: var(--red2);
+}
+
+.live-dot {
+
+    width: 7px;
+    height: 7px;
+
+    background: var(--red2);
+
+    border-radius: 50%;
+
+    box-shadow:
+        0 0 10px var(--red2);
+
+    animation: pulse 1.5s infinite;
+}
+
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.main {
+
+    max-width: 1500px;
+
+    margin: auto;
+
+    padding: 35px;
+}
+
+.case-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: flex-end;
+
+    margin-bottom: 28px;
+}
+
+.case-header-number {
+
+    font-family: "JetBrains Mono";
+
+    color: var(--red2);
+
+    font-size: 12px;
+
+    letter-spacing: 3px;
+}
+
+h1 {
+
+    font-size: 38px;
+
+    margin-top: 4px;
+}
+
+.case-description {
+
+    color: var(--muted);
+
+    margin-top: 8px;
+}
+
+.timer {
+
+    font-family: "JetBrains Mono";
+
+    font-size: 28px;
+}
+
+.timer-label {
+
+    text-align: right;
+
+    font-size: 11px;
+
+    color: var(--muted);
+}
+
+
+/* =========================================================
+   GAME GRID
+========================================================= */
+
+.game-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        310px 1fr 330px;
+
+    gap: 18px;
+}
+
+.panel {
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(22,27,37,.96),
+            rgba(13,16,23,.96)
+        );
+
+    border: 1px solid var(--border);
+
+    border-radius: 14px;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 20px 60px rgba(0,0,0,.25);
+}
+
+.panel-header {
+
+    padding: 18px 20px;
+
+    border-bottom:
+        1px solid var(--border);
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+}
+
+.panel-title {
+
+    font-weight: 700;
+}
+
+.panel-count {
+
+    font-family: "JetBrains Mono";
+
+    font-size: 11px;
+
+    color: var(--muted);
+}
+
+
+/* =========================================================
+   SUSPECTS
+========================================================= */
+
+.suspects {
+
+    padding: 10px;
+}
+
+.suspect {
+
+    padding: 15px;
+
+    border-radius: 10px;
+
+    border: 1px solid transparent;
+
+    cursor: pointer;
+
+    transition: .25s;
+
+    margin-bottom: 7px;
+
+    position: relative;
+}
+
+.suspect:hover {
+
+    background:
+        rgba(255,255,255,.035);
+
+    border-color:
+        #343c4b;
+
+    transform:
+        translateX(-3px);
+}
+
+.suspect.active {
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(217,75,87,.12),
+            transparent
+        );
+
+    border-color:
+        rgba(217,75,87,.35);
+}
+
+.suspect-number {
+
+    position: absolute;
+
+    left: 14px;
+
+    top: 14px;
+
+    font-family:
+        "JetBrains Mono";
+
+    color: #566070;
+
+    font-size: 11px;
+}
+
+.suspect-main {
+
+    display: flex;
+
+    gap: 13px;
+
+    align-items: center;
+}
+
+.avatar {
+
+    width: 48px;
+    height: 48px;
+
+    border-radius: 50%;
+
+    background:
+        linear-gradient(
+            145deg,
+            #313947,
+            #171b23
+        );
+
+    border:
+        1px solid #424b59;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: 20px;
+
+    flex-shrink: 0;
+}
+
+.suspect-name {
+
+    font-weight: 700;
+}
+
+.suspect-role {
+
+    color: var(--muted);
+
+    font-size: 12px;
+}
+
+.badge {
+
+    margin-top: 9px;
+
+    display: inline-block;
+
+    font-size: 10px;
+
+    padding: 3px 7px;
+
+    border-radius: 5px;
+
+    font-family:
+        "JetBrains Mono";
+}
+
+.badge-gray {
+
+    background: #222832;
+
+    color: #929baa;
+}
+
+.badge-yellow {
+
+    background:
+        rgba(231,185,79,.1);
+
+    color: var(--yellow);
+}
+
+.badge-red {
+
+    background:
+        rgba(217,75,87,.12);
+
+    color: var(--red2);
+}
+
+
+/* =========================================================
+   INTERROGATION
+========================================================= */
+
+.interrogation {
+
+    min-height: 650px;
+
+    display: flex;
+
+    flex-direction: column;
+}
+
+.room {
+
+    height: 250px;
+
+    position: relative;
+
+    background:
+        linear-gradient(
+            rgba(0,0,0,.1),
+            rgba(0,0,0,.7)
+        ),
+        radial-gradient(
+            circle at 50% 30%,
+            #323a47 0%,
+            #161b24 48%,
+            #0d1016 100%
+        );
+
+    overflow: hidden;
+}
+
+.room::before {
+
+    content: "";
+
+    position: absolute;
+
+    width: 420px;
+
+    height: 150px;
+
+    background:
+        rgba(255,255,255,.025);
+
+    left: 50%;
+
+    top: 30px;
+
+    transform:
+        translateX(-50%);
+
+    border-radius: 50%;
+
+    filter: blur(20px);
+}
+
+.light {
+
+    position: absolute;
+
+    width: 120px;
+
+    height: 80px;
+
+    background:
+        rgba(255,255,255,.12);
+
+    left: 50%;
+
+    top: 30px;
+
+    transform:
+        translateX(-50%);
+
+    filter: blur(20px);
+}
+
+.table {
+
+    position: absolute;
+
+    bottom: 0;
+
+    left: 50%;
+
+    transform:
+        translateX(-50%);
+
+    width: 70%;
+
+    height: 65px;
+
+    background: #171a20;
+
+    border-top:
+        3px solid #2d333e;
+
+    box-shadow:
+        0 -15px 40px rgba(0,0,0,.5);
+}
+
+.chair {
+
+    position: absolute;
+
+    bottom: 60px;
+
+    width: 80px;
+
+    height: 85px;
+
+    background: #15191f;
+
+    border:
+        1px solid #303742;
+}
+
+.chair.left {
+
+    left: 23%;
+}
+
+.chair.right {
+
+    right: 23%;
+}
+
+.person {
+
+    position: absolute;
+
+    bottom: 65px;
+
+    left: 50%;
+
+    transform:
+        translateX(-50%);
+
+    width: 75px;
+
+    height: 125px;
+}
+
+.person-head {
+
+    width: 43px;
+    height: 43px;
+
+    border-radius: 50%;
+
+    background: #59616c;
+
+    margin: auto;
+}
+
+.person-body {
+
+    width: 72px;
+
+    height: 85px;
+
+    background: #252b34;
+
+    border-radius:
+        35px 35px 0 0;
+
+    margin-top: -2px;
+}
+
+.interrogation-info {
+
+    padding:
+        20px 24px 10px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+}
+
+.current-name {
+
+    font-size: 25px;
+
+    font-weight: 800;
+}
+
+.current-job {
+
+    color: var(--muted);
+
+    font-size: 13px;
+}
+
+.question-area {
+
+    padding:
+        10px 24px;
+
+    flex: 1;
+}
+
+.question {
+
+    color: #d6dbe3;
+
+    line-height: 1.7;
+
+    background:
+        rgba(255,255,255,.025);
+
+    border:
+        1px solid #272e39;
+
+    border-radius: 10px;
+
+    padding: 18px;
+
+    min-height: 110px;
+}
+
+.question-label {
+
+    color: var(--red2);
+
+    font-family:
+        "JetBrains Mono";
+
+    font-size: 10px;
+
+    margin-bottom: 8px;
+}
+
+.answer {
+
+    color: var(--text);
+}
+
+.actions {
+
+    padding:
+        15px 24px 24px;
+
+    display: flex;
+
+    gap: 10px;
+}
+
+button {
+
+    border: none;
+
+    font-family: inherit;
+
+    cursor: pointer;
+}
+
+.action-btn {
+
+    flex: 1;
+
+    padding: 13px;
+
+    border-radius: 8px;
+
+    background: #202630;
+
+    color: #dfe4eb;
+
+    border:
+        1px solid #323a47;
+
+    transition: .2s;
+}
+
+.action-btn:hover {
+
+    background: #2a313d;
+
+    transform:
+        translateY(-2px);
+}
+
+.action-btn.primary {
+
+    background:
+        linear-gradient(
+            135deg,
+            #b83d49,
+            #7f2832
+        );
+
+    border-color:
+        #d6505c;
+
+    color: white;
+}
+
+.action-btn.primary:hover {
+
+    box-shadow:
+        0 8px 25px
+        rgba(217,75,87,.25);
+}
+
+
+/* =========================================================
+   EVIDENCE
+========================================================= */
+
+.evidence {
+
+    padding: 15px;
+
+    margin: 12px;
+
+    border:
+        1px solid #303744;
+
+    border-radius: 9px;
+
+    background:
+        rgba(255,255,255,.02);
+
+    cursor: pointer;
+
+    transition: .2s;
+}
+
+.evidence:hover {
+
+    border-color:
+        #596273;
+
+    transform:
+        translateY(-2px);
+}
+
+.evidence-icon {
+
+    font-size: 20px;
+
+    margin-bottom: 7px;
+}
+
+.evidence-title {
+
+    font-weight: 600;
+
+    font-size: 13px;
+}
+
+.evidence-description {
+
+    color: var(--muted);
+
+    font-size: 11px;
+
+    margin-top: 3px;
+}
+
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+.modal-overlay {
+
+    position: fixed;
+
+    inset: 0;
+
+    background:
+        rgba(0,0,0,.75);
+
+    backdrop-filter:
+        blur(10px);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    z-index: 100;
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    transition: .3s;
+}
+
+.modal-overlay.show {
+
+    opacity: 1;
+
+    pointer-events: all;
+}
+
+.modal {
+
+    width:
+        min(600px, 90%);
+
+    max-height: 85vh;
+
+    overflow-y: auto;
+
+    background: #12161e;
+
+    border:
+        1px solid #343c49;
+
+    border-radius: 15px;
+
+    box-shadow:
+        0 30px 100px rgba(0,0,0,.7);
+
+    transform:
+        scale(.94)
+        translateY(15px);
+
+    transition: .3s;
+}
+
+.modal-overlay.show .modal {
+
+    transform:
+        scale(1)
+        translateY(0);
+}
+
+.modal-head {
+
+    padding: 22px;
+
+    border-bottom:
+        1px solid var(--border);
+
+    display: flex;
+
+    justify-content: space-between;
+}
+
+.close {
+
+    color: var(--muted);
+
+    cursor: pointer;
+
+    font-size: 20px;
+}
+
+.modal-body {
+
+    padding: 25px;
+}
+
+.warning {
+
+    padding: 15px;
+
+    background:
+        rgba(217,75,87,.08);
+
+    border:
+        1px solid rgba(217,75,87,.25);
+
+    border-radius: 8px;
+
+    color: #f28b94;
+
+    margin-bottom: 20px;
+}
+
+.timeline {
+
+    padding: 5px;
+}
+
+.time-item {
+
+    position: relative;
+
+    padding-right: 24px;
+
+    padding-bottom: 24px;
+}
+
+.time-item::before {
+
+    content: "";
+
+    position: absolute;
+
+    right: 4px;
+
+    top: 5px;
+
+    bottom: -4px;
+
+    width: 1px;
+
+    background:
+        #303743;
+}
+
+.time-item:last-child::before {
+
+    display: none;
+}
+
+.time-dot {
+
+    position: absolute;
+
+    right: 0;
+
+    top: 4px;
+
+    width: 9px;
+
+    height: 9px;
+
+    background:
+        #606a79;
+
+    border-radius: 50%;
+
+    box-shadow:
+        0 0 0 4px #171c25;
+}
+
+.time-item.important .time-dot {
+
+    background:
+        var(--red2);
+
+    box-shadow:
+        0 0 0 4px
+        rgba(217,75,87,.12);
+}
+
+.time {
+
+    font-family:
+        "JetBrains Mono";
+
+    color:
+        var(--muted);
+
+    font-size: 10px;
+}
+
+.time-text {
+
+    margin-top: 4px;
+
+    font-size: 12px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   RESULT
+========================================================= */
+
+.result {
+
+    text-align: center;
+
+    padding:
+        40px 30px;
+}
+
+.result-icon {
+
+    width: 70px;
+
+    height: 70px;
+
+    margin: auto;
+
+    border-radius: 50%;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 30px;
+
+    background:
+        rgba(73,197,139,.1);
+
+    border:
+        1px solid
+        rgba(73,197,139,.35);
+}
+
+.result h2 {
+
+    margin-top: 20px;
+
+    font-size: 30px;
+}
+
+.result p {
+
+    color: var(--muted);
+
+    line-height: 1.7;
+
+    margin-top: 10px;
+}
+
+.restart {
+
+    margin-top: 25px;
+
+    padding:
+        13px 35px;
+
+    border-radius: 8px;
+
+    background:
+        var(--red);
+
+    color: white;
+}
+
+
+/* =========================================================
+   BACK BUTTON
+========================================================= */
+
+.back-cases {
+
+    position: fixed;
+
+    left: 25px;
+
+    top: 90px;
+
+    z-index: 60;
+
+    padding:
+        9px 14px;
+
+    border-radius: 7px;
+
+    background: #191e27;
+
+    border:
+        1px solid #303845;
+
+    color: #aeb6c3;
+
+    cursor: pointer;
+}
+
+.back-cases:hover {
+
+    background:
+        #252c37;
+}
+
+
+/* =========================================================
+   ANIMATIONS
+========================================================= */
+
+@keyframes pulse {
+
+    0%,100% {
+
+        opacity: 1;
+
+        transform:
+            scale(1);
+    }
+
+    50% {
+
+        opacity: .35;
+
+        transform:
+            scale(.7);
+    }
+}
+
+@keyframes appear {
+
+    from {
+
+        opacity: 0;
+
+        transform:
+            translateY(8px);
+    }
+
+    to {
+
+        opacity: 1;
+
+        transform:
+            translateY(0);
+    }
+}
+
+.appear {
+
+    animation:
+        appear .35s ease;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width:1100px) {
+
+    .game-grid {
+
+        grid-template-columns:
+            250px 1fr;
+    }
+
+    .right-panel {
+
+        display: none;
+    }
+
+    .case-grid {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+}
+
+@media(max-width:750px) {
+
+    .game-grid {
+
+        grid-template-columns: 1fr;
+    }
+
+    .suspect-panel {
+
+        order: 2;
+    }
+
+    .interrogation {
+
+        order: 1;
+    }
+
+    .main {
+
+        padding: 15px;
+    }
+
+    .case-header {
+
+        align-items:
+            flex-start;
+    }
+}
+
+@media(max-width:500px) {
+
+    .case-grid {
+
+        grid-template-columns: 1fr;
+    }
+
+    .case-menu-header h2 {
+
+        font-size: 32px;
+    }
+
+    .case-status {
+
+        display: none;
+    }
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     CASE SELECTOR
+========================================================= -->
+
+<div class="case-selector" id="caseSelector">
+
+    <div class="case-menu">
+
+        <div class="case-menu-header">
+
+            <div class="small-title">
+                INVESTIGATION UNIT
+            </div>
+
+            <h2>
+                CASEFILE
+            </h2>
+
+            <p>
+                בחר תיק חקירה כדי להתחיל
+            </p>
+
+        </div>
+
+
+        <div class="case-grid">
+
+
+            <div class="case-card"
+                 onclick="startCase(1)">
+
+                <div class="case-number">
+                    CASE 01
+                </div>
+
+                <h3>
+                    הלילה במועדון
+                </h3>
+
+                <p>
+                    תקיפה מינית
+                </p>
+
+                <div class="case-difficulty">
+                    ●●○○○
+                </div>
+
+            </div>
+
+
+            <div class="case-card"
+                 onclick="startCase(2)">
+
+                <div class="case-number">
+                    CASE 02
+                </div>
+
+                <h3>
+                    האבקה הלבנה
+                </h3>
+
+                <p>
+                    סמים
+                </p>
+
+                <div class="case-difficulty">
+                    ●●○○○
+                </div>
+
+            </div>
+
+
+            <div class="case-card"
+                 onclick="startCase(3)">
+
+                <div class="case-number">
+                    CASE 03
+                </div>
+
+                <h3>
+                    דירה 47
+                </h3>
+
+                <p>
+                    רצח
+                </p>
+
+                <div class="case-difficulty">
+                    ●●●○○
+                </div>
+
+            </div>
+
+
+            <div class="case-card"
+                 onclick="startCase(4)">
+
+                <div class="case-number">
+                    CASE 04
+                </div>
+
+                <h3>
+                    הכסף שנעלם
+                </h3>
+
+                <p>
+                    גניבה
+                </p>
+
+                <div class="case-difficulty">
+                    ●○○○○
+                </div>
+
+            </div>
+
+
+            <div class="case-card"
+                 onclick="startCase(5)">
+
+                <div class="case-number">
+                    CASE 05
+                </div>
+
+                <h3>
+                    היעלמות בשעה 22:00
+                </h3>
+
+                <p>
+                    נעדר
+                </p>
+
+                <div class="case-difficulty">
+                    ●●●○○
+                </div>
+
+            </div>
+
+
+            <div class="case-card"
+                 onclick="startCase(6)">
+
+                <div class="case-number">
+                    CASE 06
+                </div>
+
+                <h3>
+                    החדר הנעול
+                </h3>
+
+                <p>
+                    רצח מסתורי
+                </p>
+
+                <div class="case-difficulty">
+                    ●●●●●
+                </div>
+
+            </div>
+
+
+            <div class="case-card"
+                 onclick="startCase(7)">
+
+                <div class="case-number">
+                    CASE 07
+                </div>
+
+                <h3>
+                    העסקה
+                </h3>
+
+                <p>
+                    סחר בסמים
+                </p>
+
+                <div class="case-difficulty">
+                    ●●●●○
+                </div>
+
+            </div>
+
+
+            <div class="case-card"
+                 onclick="startCase(8)">
+
+                <div class="case-number">
+                    CASE 08
+                </div>
+
+                <h3>
+                    התאונה
+                </h3>
+
+                <p>
+                    פגע וברח
+                </p>
+
+                <div class="case-difficulty">
+                    ●●●○○
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     BACK BUTTON
+========================================================= -->
+
+<button class="back-cases"
+        onclick="showCaseSelector()">
+
+    ← תיקים
+
+</button>
+
+
+<!-- =========================================================
+     TOP BAR
+========================================================= -->
+
+<header class="topbar">
+
+
+    <div class="logo">
+
+        <div class="logo-icon">
+            07
+        </div>
+
+        <div>
+
+            <div class="logo-title">
+                CASEFILE
+            </div>
+
+            <div class="logo-sub">
+                INVESTIGATION SYSTEM
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="case-status">
+
+        <div class="status-item">
+
+            CASE
+
+            <strong id="topCaseNumber">
+                07-184
+            </strong>
+
+        </div>
+
+
+        <div class="status-item">
+
+            SUSPECTS
+
+            <strong id="suspectCount">
+                04
+            </strong>
+
+        </div>
+
+
+        <div class="status-live">
+
+            <span class="live-dot"></span>
+
+            ACTIVE
+
+        </div>
+
+    </div>
+
+</header>
+
+
+<!-- =========================================================
+     MAIN
+========================================================= -->
+
+<main class="main">
+
+
+    <div class="case-header">
+
+
+        <div>
+
+            <div class="case-header-number"
+                 id="caseHeaderNumber">
+
+                CASE 07-184
+
+            </div>
+
+
+            <h1 id="caseTitle">
+
+                הלילה במועדון
+
+            </h1>
+
+
+            <div class="case-description"
+                 id="caseDescription">
+
+                מצא את האדם שהאליבי שלו אינו תואם לראיות.
+
+            </div>
+
+        </div>
+
+
+        <div>
+
+            <div class="timer-label">
+
+                זמן חקירה
+
+            </div>
+
+
+            <div class="timer"
+                 id="timer">
+
+                15:00
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <div class="game-grid">
+
+
+        <!-- =================================================
+             SUSPECT PANEL
+        ================================================= -->
+
+        <section class="panel suspect-panel">
+
+
+            <div class="panel-header">
+
+                <div class="panel-title">
+
+                    נחקרים
+
+                </div>
+
+
+                <div class="panel-count"
+                     id="suspectPanelCount">
+
+                    04 SUBJECTS
+
+                </div>
+
+            </div>
+
+
+            <div class="suspects"
+                 id="suspects">
+
+            </div>
+
+
+        </section>
+
+
+        <!-- =================================================
+             INTERROGATION
+        ================================================= -->
+
+        <section class="panel interrogation">
+
+
+            <div class="room">
+
+                <div class="light"></div>
+
+                <div class="chair left"></div>
+
+                <div class="chair right"></div>
+
+
+                <div class="person">
+
+                    <div class="person-head"></div>
+
+                    <div class="person-body"></div>
+
+                </div>
+
+
+                <div class="table"></div>
+
+            </div>
+
+
+            <div class="interrogation-info">
+
+
+                <div>
+
+                    <div class="current-name"
+                         id="currentName">
+
+                        בחר נחקר
+
+                    </div>
+
+
+                    <div class="current-job"
+                         id="currentJob">
+
+                        —
+
+                    </div>
+
+                </div>
+
+
+                <div id="suspicionBadge"
+                     class="badge badge-gray">
+
+                    NO DATA
+
+                </div>
+
+            </div>
+
+
+            <div class="question-area">
+
+
+                <div class="question"
+                     id="questionBox">
+
+
+                    <div class="question-label">
+
+                        INTERROGATOR
+
+                    </div>
+
+
+                    <div class="answer"
+                         id="answer">
+
+                        בחר אחד מהנחקרים כדי להתחיל את החקירה.
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+            <div class="actions">
+
+
+                <button class="action-btn"
+                        onclick="askQuestion()">
+
+                    שאל על האליבי
+
+                </button>
+
+
+                <button class="action-btn"
+                        onclick="showTimeline()">
+
+                    הצג ציר זמן
+
+                </button>
+
+
+                <button class="action-btn primary"
+                        onclick="accuseCurrent()">
+
+                    החשד שלי
+
+                </button>
+
+
+            </div>
+
+
+        </section>
+
+
+        <!-- =================================================
+             EVIDENCE
+        ================================================= -->
+
+        <section class="panel right-panel">
+
+
+            <div class="panel-header">
+
+                <div class="panel-title">
+
+                    ראיות
+
+                </div>
+
+
+                <div class="panel-count">
+
+                    EVIDENCE
+
+                </div>
+
+            </div>
+
+
+            <div id="evidenceContainer">
+
+            </div>
+
+
+        </section>
+
+
+    </div>
+
+</main>
+
+
+<!-- =========================================================
+     MODAL
+========================================================= -->
+
+<div class="modal-overlay"
+     id="modal">
+
+
+    <div class="modal">
+
+
+        <div class="modal-head">
+
+            <strong id="modalTitle">
+                מידע
+            </strong>
+
+
+            <span class="close"
+                  onclick="closeModal()">
+
+                ×
+
+            </span>
+
+        </div>
+
+
+        <div class="modal-body"
+             id="modalBody">
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+<script>
+
+
+/* =========================================================
+   CASE DATABASE
+========================================================= */
+
+const cases = {
+
+
+    /* =====================================================
+       CASE 01
+    ===================================================== */
+
+    1: {
+
+        number: "07-184",
+
+        title: "הלילה במועדון",
+
+        type: "תקיפה מינית",
+
+        description:
+            "חקור את הנוכחים וגלה מי שיקר לגבי מיקומו בזמן האירוע.",
+
+        solution: 3,
+
+        suspects: [
+
+            {
+                id: 1,
+                number: "01",
+                name: "נועם לוי",
+                role: "עובד אבטחה",
+                icon: "👨",
+                badge: "נבדק",
+                badgeClass: "badge-gray",
+
+                answers: [
+                    "הייתי במשמרת שלי עד 21:45. אחרי זה נסעתי ישירות הביתה.",
+                    "לא עזבתי את עמדת האבטחה במהלך האירוע.",
+                    "המצלמות אמורות לכסות את העמדה שלי."
+                ],
+
+                timeline: [
+                    ["20:30", "התחלת משמרת", false],
+                    ["21:17", "נראה בעמדת האבטחה", false],
+                    ["21:42", "רישום כניסה למערכת", false],
+                    ["21:48", "עזב את המקום", false]
+                ]
+            },
+
+
+            {
+                id: 2,
+                number: "02",
+                name: "מאיה כהן",
+                role: "מנהלת הבר",
+                icon: "👩",
+                badge: "חשודה",
+                badgeClass: "badge-yellow",
+
+                answers: [
+                    "הייתי בבר כמעט כל הערב. יצאתי רק לכמה דקות.",
+                    "בסביבות 21:20 הלכתי למחסן להביא ציוד.",
+                    "אחר כך חזרתי לבר."
+                ],
+
+                timeline: [
+                    ["20:00", "תחילת משמרת", false],
+                    ["21:12", "נראית באזור הבר", false],
+                    ["21:20", "יציאה לכיוון המחסן", true],
+                    ["21:31", "חזרה לבר", false]
+                ]
+            },
+
+
+            {
+                id: 3,
+                number: "03",
+                name: "איתי רז",
+                role: "צלם אירועים",
+                icon: "👨‍💼",
+                badge: "חשוד",
+                badgeClass: "badge-red",
+
+                answers: [
+                    "סיימתי לצלם בסביבות 21:00.",
+                    "אחרי זה נשארתי באזור החניה וצילמתי כמה תמונות.",
+                    "לא חזרתי לתוך המבנה."
+                ],
+
+                timeline: [
+                    ["20:45", "צילום באזור המרכזי", false],
+                    ["21:04", "יציאה מהמבנה", false],
+                    ["21:17", "כרטיס חניה נסרק", false],
+                    ["21:26", "הטלפון התחבר ל-Wi-Fi של המבנה", true]
+                ]
+            },
+
+
+            {
+                id: 4,
+                number: "04",
+                name: "דניאל שחר",
+                role: "אורח",
+                icon: "🧑",
+                badge: "לא ברור",
+                badgeClass: "badge-gray",
+
+                answers: [
+                    "הגעתי בערך ב-20:30.",
+                    "ישבתי באזור הישיבה רוב הערב.",
+                    "בסביבות 21:30 יצאתי מהאירוע."
+                ],
+
+                timeline: [
+                    ["20:32", "כניסה לאירוע", false],
+                    ["20:50", "נראה באזור הישיבה", false],
+                    ["21:15", "תשלום בבר", false],
+                    ["21:34", "יציאה מהמבנה", false]
+                ]
+            }
+
+        ],
+
+        evidence: [
+
+            ["📱", "נתוני טלפון",
+             "טלפון התחבר לרשת הפנימית בשעה 21:26."],
+
+            ["📹", "מצלמת אבטחה",
+             "אדם נראה יוצא מהאזור האחורי בשעה 21:28."],
+
+            ["🎫", "כרטיס חניה",
+             "כרטיס של איתי נסרק בשעה 21:17."],
+
+            ["📝", "עדות",
+             "עד דיווח על אדם שיצא מהאזור האחורי."]
+        ]
+    },
+
+
+    /* =====================================================
+       CASE 02
+    ===================================================== */
+
+    2: {
+
+        number: "08-291",
+
+        title: "האבקה הלבנה",
+
+        type: "סמים",
+
+        description:
+            "חומר אסור נמצא בחדר. אחד מהנחקרים יודע יותר ממה שהוא אומר.",
+
+        solution: 2,
+
+        suspects: [
+
+            {
+                id: 1,
+                number: "01",
+                name: "רון מזרחי",
+                role: "סטודנט",
+                icon: "👨",
+                badge: "נבדק",
+                badgeClass: "badge-gray",
+
+                answers: [
+                    "הייתי בסלון כל הערב.",
+                    "לא נכנסתי לחדר השינה.",
+                    "לא ידעתי שיש משהו אסור בבית."
+                ],
+
+                timeline: [
+                    ["19:30", "הגיע לבית", false],
+                    ["20:10", "נראה בסלון", false],
+                    ["21:00", "שיחת טלפון", false],
+                    ["21:35", "עזב", false]
+                ]
+            },
+
+
+            {
+                id: 2,
+                number: "02",
+                name: "עומר בן דוד",
+                role: "מארגן האירוע",
+                icon: "👨‍💼",
+                badge: "חשוד",
+                badgeClass: "badge-red",
+
+                answers: [
+                    "הייתי בחדר העבודה רוב הערב.",
+                    "אף אחד לא ביקש ממני להיכנס לחדר השינה.",
+                    "אני לא יודע איך החומר הגיע לשם."
+                ],
+
+                timeline: [
+                    ["19:15", "הגיע", false],
+                    ["20:20", "נכנס לחדר העבודה", false],
+                    ["20:48", "נראה במסדרון", true],
+                    ["21:12", "חזר לחדר העבודה", false]
+                ]
+            },
+
+
+            {
+                id: 3,
+                number: "03",
+                name: "שירה אביב",
+                role: "אורחת",
+                icon: "👩",
+                badge: "לא ברור",
+                badgeClass: "badge-yellow",
+
+                answers: [
+                    "הגעתי מאוחר.",
+                    "דיברתי עם כולם בסלון.",
+                    "לא הייתי ליד החדר."
+                ],
+
+                timeline: [
+                    ["20:40", "כניסה לבית", false],
+                    ["20:55", "נראית בסלון", false],
+                    ["21:10", "נכנסה למסדרון", true],
+                    ["21:30", "חזרה לסלון", false]
+                ]
+            }
+
+        ],
+
+        evidence: [
+
+            ["🧪", "בדיקת מעבדה",
+             "החומר שנמצא זוהה כחומר אסור."],
+
+            ["📷", "צילום חדר",
+             "החומר נמצא בתוך תיק שאינו שייך לבעל הבית."],
+
+            ["🔑", "מפתח",
+             "מפתח לחדר נמצא בכיסו של אחד הנחקרים."],
+
+            ["📱", "הודעות",
+             "נמצאו הודעות הקשורות למפגש באותו ערב."]
+        ]
+    },
+
+
+    /* =====================================================
+       CASE 03
+    ===================================================== */
+
+    3: {
+
+        number: "09-447",
+
+        title: "דירה 47",
+
+        type: "רצח",
+
+        description:
+            "אדם נמצא מת בדירתו. לכל אחד מהנוכחים יש סיבה לשקר.",
+
+        solution: 4,
+
+        suspects: [
+
+            {
+                id: 1,
+                number: "01",
+                name: "אלון פרץ",
+                role: "שכן",
+                icon: "👨",
+                badge: "נבדק",
+                badgeClass: "badge-gray",
+
+                answers: [
+                    "שמעתי רעש מהדירה.",
+                    "לא נכנסתי פנימה.",
+                    "נשארתי בדירה שלי."
+                ],
+
+                timeline: [
+                    ["21:00", "בבית", false],
+                    ["21:21", "שמע רעש", false],
+                    ["21:25", "פתח את דלת הדירה", false],
+                    ["21:40", "התקשר למשטרה", false]
+                ]
+            },
+
+
+            {
+                id: 2,
+                number: "02",
+                name: "נועה ברק",
+                role: "שותפה עסקית",
+                icon: "👩",
+                badge: "חשודה",
+                badgeClass: "badge-yellow",
+
+                answers: [
+                    "נפגשתי איתו מוקדם יותר.",
+                    "עזבתי לפני 21:00.",
+                    "לא חזרתי לדירה."
+                ],
+
+                timeline: [
+                    ["20:15", "הגיעה לדירה", false],
+                    ["20:42", "ויכוח נשמע מהמסדרון", true],
+                    ["20:55", "יצאה מהבניין", false],
+                    ["21:10", "טלפון כבוי", true]
+                ]
+            },
+
+
+            {
+                id: 3,
+                number: "03",
+                name: "גיל שקד",
+                role: "חבר",
+                icon: "🧑",
+                badge: "לא ברור",
+                badgeClass: "badge-gray",
+
+                answers: [
+                    "הייתי בבית כל הערב.",
+                    "לא דיברתי איתו באותו יום.",
+                    "אין לי מושג מה קרה."
+                ],
+
+                timeline: [
+                    ["20:30", "יציאה מהבית", true],
+                    ["20:50", "מיקום לא ידוע", true],
+                    ["21:15", "חזרה לאזור הבית", false]
+                ]
+            },
+
+
+            {
+                id: 4,
+                number: "04",
+                name: "תומר וייס",
+                role: "אח של הקורבן",
+                icon: "👨‍🦱",
+                badge: "חשוד",
+                badgeClass: "badge-red",
+
+                answers: [
+                    "הגעתי רק אחרי שקיבלתי את השיחה.",
+                    "לא הייתי בדירה לפני כן.",
+                    "אין לי סיבה לפגוע בו."
+                ],
+
+                timeline: [
+                    ["20:45", "טלפון מהקורבן", false],
+                    ["21:05", "נכנס לבניין", true],
+                    ["21:09", "מצלמה מפסיקה לקלוט", true],
+                    ["21:30", "נמצא מחוץ לבניין", false]
+                ]
+            }
+
+        ],
+
+        evidence: [
+
+            ["🔪", "ממצא בזירה",
+             "פריט שנמצא בדירה נשלח לבדיקה."],
+
+            ["📹", "מצלמת בניין",
+             "אדם נכנס לבניין בשעה 21:05."],
+
+            ["📱", "טלפון",
+             "נמצאה שיחה מהקורבן לאחד החשודים."],
+
+            ["🩸", "דו״ח זירה",
+             "זמן האירוע המשוער נקבע לטווח 21:05–21:25."]
+        ]
+    },
+
+
+    /* =====================================================
+       CASE 04
+    ===================================================== */
+
+    4: {
+
+        number: "10-103",
+
+        title: "הכסף שנעלם",
+
+        type: "גניבה",
+
+        description:
+            "סכום כסף גדול נעלם מחדר שהיה נעול.",
+
+        solution: 1,
+
+        suspects: [
+
+            {
+                id: 1,
+                number: "01",
+                name: "דנה לוי",
+                role: "מנהלת משרד",
+                icon: "👩",
+                badge: "חשודה",
+                badgeClass: "badge-red",
+
+                answers: [
+                    "הייתי האחרונה שנעלה את החדר.",
+                    "אף אחד אחר לא ביקש את המפתח.",
+                    "אחרי זה הלכתי למטבח."
+                ],
+
+                timeline: [
+                    ["18:30", "הפקדת הכסף", false],
+                    ["18:50", "כניסה לחדר", false],
+                    ["19:05", "נעילת החדר", true],
+                    ["19:30", "עזבה את הקומה", false]
+                ]
+            },
+
+
+            {
+                id: 2,
+                number: "02",
+                name: "אורי כהן",
+                role: "עובד",
+                icon: "👨",
+                badge: "נבדק",
+                badgeClass: "badge-gray",
+
+                answers: [
+                    "הייתי בעמדה שלי.",
+                    "לא היה לי מפתח.",
+                    "לא ראיתי את הכסף."
+                ],
+
+                timeline: [
+                    ["18:30", "בעמדה", false],
+                    ["18:55", "שיחת טלפון", false],
+                    ["19:20", "במטבח", false]
+                ]
+            },
+
+
+            {
+                id: 3,
+                number: "03",
+                name: "מיכל רון",
+                role: "ניקיון",
+                icon: "👩‍🦱",
+                badge: "לא ברור",
+                badgeClass: "badge-yellow",
+
+                answers: [
+                    "ניקיתי במסדרון.",
+                    "לא נכנסתי לחדר.",
+                    "לא ידעתי שיש שם כסף."
+                ],
+
+                timeline: [
+                    ["18:40", "ניקוי מסדרון", false],
+                    ["19:00", "נעלמה מהמצלמה", true],
+                    ["19:12", "חזרה למסדרון", false]
+                ]
+            }
+
+        ],
+
+        evidence: [
+
+            ["🔐", "מנעול",
+             "החדר נפתח באמצעות מפתח פיזי."],
+
+            ["📹", "מצלמה",
+             "רק שלושה אנשים נראו בקומה."],
+
+            ["💰", "רישום כספי",
+             "הכסף היה בחדר בשעה 18:50."],
+
+            ["🔑", "מפתח",
+             "מפתח נוסף נמצא במשרד המנהלת."]
+        ]
+    },
+
+
+    /* =====================================================
+       CASE 05
+    ===================================================== */
+
+    5: {
+
+        number: "11-562",
+
+        title: "היעלמות בשעה 22:00",
+
+        type: "נעדר",
+
+        description:
+            "אדם נעלם במהלך ערב רגיל. ארבעה אנשים היו האחרונים לראות אותו.",
+
+        solution: 2,
+
+        suspects: [
+
+            {
+                id: 1,
+                number: "01",
+                name: "רועי גפן",
+                role: "חבר",
+                icon: "👨",
+                badge: "נבדק",
+                badgeClass: "badge-gray",
+
+                answers: [
+                    "דיברתי איתו בסביבות 21:00.",
+                    "אחרי זה הלכתי הביתה.",
+                    "לא ראיתי אותו שוב."
+                ],
+
+                timeline: [
+                    ["20:30", "פגישה", false],
+                    ["21:02", "שיחה עם הנעדר", false],
+                    ["21:15", "עזיבה", false]
+                ]
+            },
+
+
+            {
+                id: 2,
+                number: "02",
+                name: "עמית רז",
+                role: "שותף לדירה",
+                icon: "👨‍🦱",
+                badge: "חשוד",
+                badgeClass: "badge-red",
+
+                answers: [
+                    "הוא יצא בערך ב-21:30.",
+                    "לא ידעתי לאן הוא הולך.",
+                    "נשארתי בבית."
+                ],
+
+                timeline: [
+                    ["21:10", "ויכוח בדירה", true],
+                    ["21:34", "יציאה מהבניין", false],
+                    ["21:51", "טלפון כבוי", true],
+                    ["22:05", "שכן רואה רכב", true]
+                ]
+            },
+
+
+            {
+                id: 3,
+                number: "03",
+                name: "הילה שחר",
+                role: "חברה",
+                icon: "👩",
+                badge: "לא ברור",
+                badgeClass: "badge-yellow",
+
+                answers: [
+                    "שלחתי לו הודעה.",
+                    "לא נפגשנו.",
+                    "אני לא יודעת איפה הוא."
+                ],
+
+                timeline: [
+                    ["20:50", "הודעה", false],
+                    ["21:20", "שיחת טלפון", false],
+                    ["22:10", "הודעה נוספת", false]
+                ]
+            }
+
+        ],
+
+        evidence: [
+
+            ["📱", "טלפון",
+             "הטלפון של הנעדר הפסיק לשדר ב-21:51."],
+
+            ["🚗", "רכב",
+             "רכב דומה לרכב של אחד החשודים נראה באזור."],
+
+            ["📷", "מצלמה",
+             "אדם נראה יוצא מהבניין ב-21:34."],
+
+            ["📝", "הודעה",
+             "נשלחה הודעה שלא תואמת לגרסת אחד החשודים."]
+        ]
+    },
+
+
+    /* =====================================================
+       CASE 06
+    ===================================================== */
+
+    6: {
+
+        number: "12-901",
+
+        title: "החדר הנעול",
+
+        type: "רצח מסתורי",
+
+        description:
+            "אדם נמצא בחדר שהיה נעול מבפנים. רק אחד מהחשודים ידע כיצד לפתוח אותו.",
+
+        solution: 5,
+
+        suspects: [
+
+            {
+                id: 1,
+                number: "01",
+                name: "אדם רון",
+                role: "שכן",
+                icon: "👨",
+                badge: "נבדק",
+                badgeClass: "badge-gray",
+                answers: [
+                    "לא נכנסתי לחדר.",
+                    "שמעתי רעש מבחוץ.",
+                    "לא הכרתי את הקורבן היטב."
+                ],
+                timeline: [
+                    ["20:10", "בבית", false],
+                    ["21:00", "שמע רעש", false],
+                    ["21:15", "התקשר לשכן", false]
+                ]
+            },
+
+
+            {
+                id: 2,
+                number: "02",
+                name: "נועה שלו",
+                role: "עובדת",
+                icon: "👩",
+                badge: "נבדקת",
+                badgeClass: "badge-gray",
+                answers: [
+                    "עזבתי מוקדם.",
+                    "הדלת הייתה סגורה.",
+                    "אין לי מפתח."
+                ],
+                timeline: [
+                    ["19:30", "כניסה", false],
+                    ["20:40", "יציאה", false]
+                ]
+            },
+
+
+            {
+                id: 3,
+                number: "03",
+                name: "איתי כהן",
+                role: "חבר",
+                icon: "🧑",
+                badge: "חשוד",
+                badgeClass: "badge-yellow",
+                answers: [
+                    "לא ידעתי שהחדר נעול.",
+                    "עזבתי בסביבות 20:30.",
+                    "לא חזרתי."
+                ],
+                timeline: [
+                    ["19:50", "הגעה", false],
+                    ["20:31", "יציאה", false],
+                    ["21:12", "שיחה מהקורבן", true]
+                ]
+            },
+
+
+            {
+                id: 4,
+                number: "04",
+                name: "מיה פרץ",
+                role: "אחות",
+                icon: "👩‍🦱",
+                badge: "חשודה",
+                badgeClass: "badge-yellow",
+                answers: [
+                    "דיברתי איתו בטלפון.",
+                    "לא הייתי בבניין.",
+                    "לא היה לי מפתח."
+                ],
+                timeline: [
+                    ["20:10", "שיחה", false],
+                    ["20:50", "מיקום לא ידוע", true]
+                ]
+            },
+
+
+            {
+                id: 5,
+                number: "05",
+                name: "דוד שחר",
+                role: "בעל הבניין",
+                icon: "👨‍💼",
+                badge: "חשוד",
+                badgeClass: "badge-red",
+                answers: [
+                    "רק אני מחזיק את מפתח החירום.",
+                    "לא השתמשתי בו.",
+                    "לא הייתי בקומה."
+                ],
+                timeline: [
+                    ["20:20", "בכניסה לבניין", false],
+                    ["20:58", "נעלם מהמצלמה", true],
+                    ["21:20", "נמצא בלובי", false]
+                ]
+            }
+
+        ],
+
+        evidence: [
+
+            ["🔐", "דלת נעולה",
+             "הדלת נמצאה נעולה מבפנים."],
+
+            ["🔑", "מפתח חירום",
+             "רק אדם אחד החזיק מפתח חירום."],
+
+            ["📹", "מצלמה",
+             "המצלמה קלטה תנועה במסדרון."],
+
+            ["🧤", "ממצא",
+             "נמצא פריט הקשור לאחד החשודים."]
+        ]
+    },
+
+
+    /* =====================================================
+       CASE 07
+    ===================================================== */
+
+    7: {
+
+        number: "13-772",
+
+        title: "העסקה",
+
+        type: "סחר בסמים",
+
+        description:
+            "עסקה השתבשה. אחד מהנחקרים מסתיר את זהותו של הסוחר.",
+
+        solution: 3,
+
+        suspects: [
+
+            {
+                id: 1,
+                number: "01",
+                name: "יובל מגן",
+                role: "נהג",
+                icon: "👨",
+                badge: "נבדק",
+                badgeClass: "badge-gray",
+                answers: [
+                    "רק הסעתי אדם למקום.",
+                    "לא ידעתי מה הוא עושה.",
+                    "חיכיתי ברכב."
+                ],
+                timeline: [
+                    ["22:00", "יציאה", false],
+                    ["22:21", "הגעה", false],
+                    ["22:42", "עזיבה", false]
+                ]
+            },
+
+
+            {
+                id: 2,
+                number: "02",
+                name: "רוני בר",
+                role: "שליח",
+                icon: "🧑",
+                badge: "חשוד",
+                badgeClass: "badge-yellow",
+                answers: [
+                    "לא מסרתי שום דבר.",
+                    "הייתי במקום במקרה.",
+                    "אני לא מכיר את האנשים האחרים."
+                ],
+                timeline: [
+                    ["22:10", "כניסה לאזור", false],
+                    ["22:29", "פגישה", true],
+                    ["22:35", "עזיבה", false]
+                ]
+            },
+
+
+            {
+                id: 3,
+                number: "03",
+                name: "עידו לוין",
+                role: "מארגן",
+                icon: "👨‍💼",
+                badge: "חשוד",
+                badgeClass: "badge-red",
+                answers: [
+                    "לא הייתי חלק מהעסקה.",
+                    "רק נפגשתי עם חבר.",
+                    "אין לי קשר לחומר."
+                ],
+                timeline: [
+                    ["21:50", "הגעה", false],
+                    ["22:18", "פגישה", true],
+                    ["22:31", "שיחה", true],
+                    ["22:45", "עזיבה", false]
+                ]
+            }
+
+        ],
+
+        evidence: [
+
+            ["💬", "הודעות",
+             "נמצאו הודעות המתאמות מפגש."],
+
+            ["📱", "טלפון",
+             "אחד המכשירים היה באזור בזמן העסקה."],
+
+            ["🚗", "רכב",
+             "רכב נצפה מגיע ועוזב במהירות."],
+
+            ["🧪", "בדיקה",
+             "חומר שנמצא ברכב נבדק במעבדה."]
+        ]
+    },
+
+
+    /* =====================================================
+       CASE 08
+    ===================================================== */
+
+    8: {
+
+        number: "14-338",
+
+        title: "התאונה",
+
+        type: "פגע וברח",
+
+        description:
+            "נהג פגע באדם ונמלט. ארבעה אנשים מחזיקים בחלק מהאמת.",
+
+        solution: 4,
+
+        suspects: [
+
+            {
+                id: 1,
+                number: "01",
+                name: "אורי שקד",
+                role: "נהג מונית",
+                icon: "👨",
+                badge: "נבדק",
+                badgeClass: "badge-gray",
+                answers: [
+                    "הייתי בכביש הראשי.",
+                    "לא פגעתי באף אחד.",
+                    "הרכב שלי לא נפגע."
+                ],
+                timeline: [
+                    ["23:00", "תחילת נסיעה", false],
+                    ["23:18", "מצלמה קולטת את הרכב", false],
+                    ["23:40", "הגעה ליעד", false]
+                ]
+            },
+
+
+            {
+                id: 2,
+                number: "02",
+                name: "מאור כהן",
+                role: "שליח",
+                icon: "🧑",
+                badge: "לא ברור",
+                badgeClass: "badge-yellow",
+                answers: [
+                    "נסעתי באזור.",
+                    "לא ראיתי תאונה.",
+                    "המשכתי ישירות ללקוח."
+                ],
+                timeline: [
+                    ["23:10", "יציאה", false],
+                    ["23:26", "אזור התאונה", true],
+                    ["23:29", "עזיבה", false]
+                ]
+            },
+
+
+            {
+                id: 3,
+                number: "03",
+                name: "שחר רון",
+                role: "סטודנט",
+                icon: "👨‍🦱",
+                badge: "נבדק",
+                badgeClass: "badge-gray",
+                answers: [
+                    "הלכתי ברגל.",
+                    "לא הייתי באזור הכביש.",
+                    "חזרתי הביתה מוקדם."
+                ],
+                timeline: [
+                    ["22:50", "יציאה", false],
+                    ["23:15", "נראה במצלמה", false],
+                    ["23:30", "הגעה לבית", false]
+                ]
+            },
+
+
+            {
+                id: 4,
+                number: "04",
+                name: "דניאל פרץ",
+                role: "נהג פרטי",
+                icon: "👨‍💼",
+                badge: "חשוד",
+                badgeClass: "badge-red",
+                answers: [
+                    "הייתי בדרך הביתה.",
+                    "לא שמתי לב לשום דבר.",
+                    "הרכב שלי לא נפגע."
+                ],
+                timeline: [
+                    ["23:17", "יציאה", false],
+                    ["23:24", "אזור התאונה", true],
+                    ["23:25", "מהירות חריגה", true],
+                    ["23:40", "הגעה לבית", false]
+                ]
+            }
+
+        ],
+
+        evidence: [
+
+            ["🚗", "שברי רכב",
+             "נמצאו שברי רכב בצבע מסוים."],
+
+            ["📹", "מצלמת כביש",
+             "רכב חשוד עבר באזור בזמן האירוע."],
+
+            ["🔧", "בדיקת רכב",
+             "נמצאו סימנים חדשים ברכב אחד."],
+
+            ["📞", "שיחת חירום",
+             "השיחה התקבלה בשעה 23:25."]
+        ]
+    }
+
+};
+
+
+/* =========================================================
+   VARIABLES
+========================================================= */
+
+let currentCase = 1;
+
+let selected = null;
+
+let timeLeft = 900;
+
+
+/* =========================================================
+   ELEMENTS
+========================================================= */
+
+const suspectsContainer =
+    document.getElementById("suspects");
+
+const evidenceContainer =
+    document.getElementById("evidenceContainer");
+
+
+/* =========================================================
+   START CASE
+========================================================= */
+
+function startCase(caseNumber) {
+
+    currentCase = caseNumber;
+
+    selected = null;
+
+    timeLeft = 900;
+
+    const data =
+        cases[currentCase];
+
+
+    /* CASE INFORMATION */
+
+    document.getElementById("caseHeaderNumber")
+        .innerText =
+        "CASE " + data.number;
+
+    document.getElementById("topCaseNumber")
+        .innerText =
+        data.number;
+
+    document.getElementById("caseTitle")
+        .innerText =
+        data.title;
+
+    document.getElementById("caseDescription")
+        .innerText =
+        data.description;
+
+
+    /* SUSPECT COUNT */
+
+    document.getElementById("suspectCount")
+        .innerText =
+        data.suspects.length;
+
+    document.getElementById("suspectPanelCount")
+        .innerText =
+        String(data.suspects.length)
+        .padStart(2, "0")
+        + " SUBJECTS";
+
+
+    /* RESET INTERROGATION */
+
+    document.getElementById("currentName")
+        .innerText =
+        "בחר נחקר";
+
+    document.getElementById("currentJob")
+        .innerText =
+        "—";
+
+    document.getElementById("suspicionBadge")
+        .innerText =
+        "NO DATA";
+
+    document.getElementById("suspicionBadge")
+        .className =
+        "badge badge-gray";
+
+    document.getElementById("answer")
+        .innerText =
+        "בחר אחד מהנחקרים כדי להתחיל את החקירה.";
+
+
+    /* RENDER */
+
+    renderSuspects();
+
+    renderEvidence();
+
+
+    /* TIMER */
+
+    updateTimerDisplay();
+
+
+    /* HIDE CASE MENU */
+
+    document
+        .getElementById("caseSelector")
+        .classList.add("hidden");
+
+}
+
+
+/* =========================================================
+   RENDER SUSPECTS
+========================================================= */
+
+function renderSuspects() {
+
+    suspectsContainer.innerHTML = "";
+
+    const data =
+        cases[currentCase];
+
+
+    data.suspects.forEach(s => {
+
+
+        const div =
+            document.createElement("div");
+
+
+        div.className =
+            "suspect";
+
+
+        div.innerHTML = `
+
+            <div class="suspect-number">
+                #${s.number}
+            </div>
+
+            <div class="suspect-main">
+
+                <div class="avatar">
+                    ${s.icon}
+                </div>
+
+                <div>
+
+                    <div class="suspect-name">
+                        ${s.name}
+                    </div>
+
+                    <div class="suspect-role">
+                        ${s.role}
+                    </div>
+
+                    <span class="badge ${s.badgeClass}">
+                        ${s.badge}
+                    </span>
+
+                </div>
+
+            </div>
+
+        `;
+
+
+        div.onclick =
+            () => selectSuspect(s);
+
+
+        suspectsContainer
+            .appendChild(div);
+
+    });
+
+}
+
+
+/* =========================================================
+   RENDER EVIDENCE
+========================================================= */
+
+function renderEvidence() {
+
+    evidenceContainer.innerHTML = "";
+
+    const data =
+        cases[currentCase];
+
+
+    data.evidence.forEach(
+        (evidence, index) => {
+
+
+        const div =
+            document.createElement("div");
+
+
+        div.className =
+            "evidence";
+
+
+        div.innerHTML = `
+
+            <div class="evidence-icon">
+                ${evidence[0]}
+            </div>
+
+            <div class="evidence-title">
+                ${evidence[1]}
+            </div>
+
+            <div class="evidence-description">
+                ${evidence[2]}
+            </div>
+
+        `;
+
+
+        div.onclick =
+            () => showEvidence(index);
+
+
+        evidenceContainer
+            .appendChild(div);
+
+    });
+
+}
+
+
+/* =========================================================
+   SELECT SUSPECT
+========================================================= */
+
+function selectSuspect(s) {
+
+    selected = s;
+
+
+    document
+        .querySelectorAll(".suspect")
+        .forEach(
+            x => x.classList.remove("active")
+        );
+
+
+    [...document
+        .querySelectorAll(".suspect")]
+        .find(
+            x => x.innerText.includes(s.name)
+        )
+        .classList.add("active");
+
+
+    document.getElementById("currentName")
+        .innerText =
+        s.name;
+
+
+    document.getElementById("currentJob")
+        .innerText =
+        s.role;
+
+
+    const badge =
+        document.getElementById("suspicionBadge");
+
+
+    badge.innerText =
+        s.badge;
+
+
+    badge.className =
+        "badge " + s.badgeClass;
+
+
+    setAnswer(
+        `הנחקר ${s.name} מוכן לענות על שאלות. לחץ על "שאל על האליבי" כדי להתחיל.`
+    );
+
+}
+
+
+/* =========================================================
+   ANSWER
+========================================================= */
+
+function setAnswer(text) {
+
+    const box =
+        document.getElementById("questionBox");
+
+
+    box.classList.remove("appear");
+
+
+    void box.offsetWidth;
+
+
+    box.classList.add("appear");
+
+
+    document.getElementById("answer")
+        .innerText =
+        text;
+
+}
+
+
+/* =========================================================
+   ASK QUESTION
+========================================================= */
+
+function askQuestion() {
+
+    if (!selected) {
+
+        setAnswer(
+            "בחר קודם אחד מהנחקרים."
+        );
+
+        return;
+    }
+
+
+    const answers =
+        selected.answers;
+
+
+    const random =
+        answers[
+            Math.floor(
+                Math.random() *
+                answers.length
+            )
+        ];
+
+
+    setAnswer(random);
+
+}
+
+
+/* =========================================================
+   TIMELINE
+========================================================= */
+
+function showTimeline() {
+
+    if (!selected) {
+
+        setAnswer(
+            "בחר נחקר כדי לראות את ציר הזמן שלו."
+        );
+
+        return;
+    }
+
+
+    let html = `
+
+        <div style="
+            margin-bottom:20px;
+            color:#8c96a5;
+        ">
+
+            ציר הזמן של
+            <strong>
+                ${selected.name}
+            </strong>
+
+        </div>
+
+        <div class="timeline">
+
+    `;
+
+
+    selected.timeline.forEach(item => {
+
+        html += `
+
+            <div class="time-item
+                ${item[2] ? "important" : ""}">
+
+                <div class="time-dot"></div>
+
+                <div class="time">
+                    ${item[0]}
+                </div>
+
+                <div class="time-text">
+                    ${item[1]}
+                </div>
+
+            </div>
+
+        `;
+
+    });
+
+
+    html += `
+        </div>
+    `;
+
+
+    openModal(
+        "TIMELINE / " +
+        selected.name,
+        html
+    );
+
+}
+
+
+/* =========================================================
+   EVIDENCE
+========================================================= */
+
+function showEvidence(index) {
+
+    const data =
+        cases[currentCase];
+
+
+    const evidence =
+        data.evidence[index];
+
+
+    openModal(
+
+        evidence[1],
+
+        `
+
+        <div class="warning">
+
+            ${evidence[2]}
+
+        </div>
+
+        <p style="
+            color:#9aa4b2;
+            line-height:1.7;
+        ">
+
+            בדוק כיצד המידע הזה משתלב
+            עם הגרסאות של הנחקרים.
+
+        </p>
+
+        `
+
+    );
+
+}
+
+
+/* =========================================================
+   ACCUSE
+========================================================= */
+
+function accuseCurrent() {
+
+    if (!selected) {
+
+        setAnswer(
+            "בחר נחקר לפני שאתה מקבל החלטה."
+        );
+
+        return;
+    }
+
+
+    openModal(
+
+        "החלטה סופית",
+
+        `
+
+        <div class="warning">
+
+            אתה עומד להכריע את התיק.
+
+            ודא שעברת על האליבי,
+            ציר הזמן והראיות.
+
+        </div>
+
+
+        <p style="
+            color:#9aa4b2;
+            margin-bottom:18px;
+        ">
+
+            האם אתה בטוח שאתה רוצה
+            להגיש המלצה נגד
+
+            <strong>
+                ${selected.name}
+            </strong>
+
+            ?
+
+        </p>
+
+
+        <button
+            class="action-btn primary"
+            style="width:100%"
+            onclick="finalDecision(${selected.id})">
+
+            כן — להגיש המלצה
+
+        </button>
+
+
+        <br>
+        <br>
+
+
+        <button
+            class="action-btn"
+            style="width:100%"
+            onclick="closeModal()">
+
+            עדיין לא
+
+        </button>
+
+        `
+    );
+
+}
+
+
+/* =========================================================
+   FINAL DECISION
+========================================================= */
+
+function finalDecision(id) {
+
+    closeModal();
+
+
+    setTimeout(() => {
+
+        const solution =
+            cases[currentCase].solution;
+
+
+        if (id === solution) {
+
+            showResult(true);
+
+        } else {
+
+            showResult(false);
+
+        }
+
+    }, 300);
+
+}
+
+
+/* =========================================================
+   RESULT
+========================================================= */
+
+function showResult(correct) {
+
+    const data =
+        cases[currentCase];
+
+
+    const overlay =
+        document.getElementById("modal");
+
+
+    const body =
+        document.getElementById("modalBody");
+
+
+    document.getElementById("modalTitle")
+        .innerText =
+        correct
+            ? "CASE SOLVED"
+            : "CASE FAILED";
+
+
+    if (correct) {
+
+
+        body.innerHTML = `
+
+            <div class="result">
+
+                <div class="result-icon">
+                    ✓
+                </div>
+
+
+                <h2>
+                    פתרת את התיק
+                </h2>
+
+
+                <p>
+
+                    החקירה שלך הובילה
+                    לחשוד הנכון בתיק
+                    <strong>
+                        ${data.title}
+                    </strong>.
+
+                    <br><br>
+
+                    הצלחת לחבר בין
+                    האליבי, ציר הזמן
+                    והראיות.
+
+                </p>
+
+
+                <button
+                    class="restart"
+                    onclick="showCaseSelector()">
+
+                    חזרה לתיקים
+
+                </button>
+
+            </div>
+
+        `;
+
+    }
+
+    else {
+
+
+        body.innerHTML = `
+
+            <div class="result">
+
+                <div class="result-icon"
+                     style="
+                        color:#d94b57;
+                        border-color:
+                        rgba(217,75,87,.4);
+                        background:
+                        rgba(217,75,87,.08);
+                     ">
+
+                    ×
+
+                </div>
+
+
+                <h2>
+                    החלטה שגויה
+                </h2>
+
+
+                <p>
+
+                    החשוד שבחרת אינו
+                    תואם לראיות המרכזיות.
+
+                    <br><br>
+
+                    חזור לתיק ובדוק שוב
+                    את ציר הזמן והאליבי.
+
+                </p>
+
+
+                <button
+                    class="restart"
+                    onclick="closeModal()">
+
+                    המשך חקירה
+
+                </button>
+
+            </div>
+
+        `;
+
+    }
+
+
+    overlay.classList.add("show");
+
+}
+
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+function openModal(title, body) {
+
+    document.getElementById("modalTitle")
+        .innerText =
+        title;
+
+
+    document.getElementById("modalBody")
+        .innerHTML =
+        body;
+
+
+    document.getElementById("modal")
+        .classList.add("show");
+
+}
+
+
+function closeModal() {
+
+    document.getElementById("modal")
+        .classList.remove("show");
+
+}
+
+
+/* =========================================================
+   CASE SELECTOR
+========================================================= */
+
+function showCaseSelector() {
+
+    closeModal();
+
+
+    document
+        .getElementById("caseSelector")
+        .classList.remove("hidden");
+
+}
+
+
+/* =========================================================
+   TIMER
+========================================================= */
+
+function updateTimerDisplay() {
+
+    const minutes =
+        Math.floor(timeLeft / 60)
+        .toString()
+        .padStart(2, "0");
+
+
+    const seconds =
+        (timeLeft % 60)
+        .toString()
+        .padStart(2, "0");
+
+
+    document.getElementById("timer")
+        .innerText =
+        `${minutes}:${seconds}`;
+
+}
+
+
+setInterval(() => {
+
+    if (
+        !document
+            .getElementById("caseSelector")
+            .classList.contains("hidden")
+    ) {
+
+        return;
+
+    }
+
+
+    if (timeLeft <= 0) {
+
+        showResult(false);
+
+        return;
+
+    }
+
+
+    timeLeft--;
+
+    updateTimerDisplay();
+
+}, 1000);
+
+
+/* =========================================================
+   INITIAL
+========================================================= */
+
+startCase(1);
+
+</script>
+
+</body>
+
+</html>
